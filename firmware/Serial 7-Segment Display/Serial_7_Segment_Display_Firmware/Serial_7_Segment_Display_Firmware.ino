@@ -4,10 +4,11 @@
    Date: August 24, 2012
    License: This code is beerware: feel free to use it, with or without attribution,
    in your own projects. If you find it helpful, buy me a beer next time you see me
-   at the local.
+   at the local pub.
    
    Description: This firmware goes on the SparkFun Serial 7-Segment displays.
-   !!! Add product page link
+   https://www.sparkfun.com/search/results?term=serial+7+segment&what=products
+   
    You can send the display serial data over either UART, SPI, or I2C. It'll
    sequentially display what it reads. There are special commands to control 
    individual segments, clear the display, reset the cursor, adjust the display's 
@@ -158,7 +159,7 @@ void setup()
   }
   
   /* Initialize cathode pin states to OUTPUTS all HIGHs */
-  for (int i=0; i<8; i++)
+  for (int i = 0 ; i < 8 ; i++)
   {
     pinMode(cathodes[i], OUTPUT);
     digitalWrite(cathodes[i], HIGH);
@@ -181,7 +182,7 @@ void loop()
 {
   int delayTimer = 0;
   
-  for (int i=0; i<5; i++)  // Run through this once for each digit and once for the decimals
+  for (int i = 0 ; i < 5 ; i++)  // Run through this once for each digit and once for the decimals
   {
     displayDigit(display.digits[i], i);  // Set all the segments correctly
     
