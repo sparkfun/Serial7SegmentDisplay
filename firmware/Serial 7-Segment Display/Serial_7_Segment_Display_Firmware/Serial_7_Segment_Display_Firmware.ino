@@ -355,9 +355,9 @@ void setupUart()
    SPI is set to MODE 0 (CPOL=0, CPHA=0), slave mode, LSB first */
 void setupSPI()
 {
-  pinMode(13, INPUT);  // SCK
-  pinMode(11, INPUT);  // MOSI
-  pinMode(10, INPUT_PULLUP);  // SS
+  pinMode(SPI_SCK, INPUT);
+  pinMode(SPI_MOSI, INPUT);
+  pinMode(SPI_CS, INPUT_PULLUP);
   
   SPCR = (1<<SPIE) | (1<<SPE);  // Enable SPI interrupt, enable SPI
   /* DORD = 0, LSB First

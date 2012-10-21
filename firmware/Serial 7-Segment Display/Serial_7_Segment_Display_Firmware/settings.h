@@ -1,3 +1,9 @@
+//Pin definitions
+#define SPI_CS			10
+#define SPI_MOSI		11
+#define SPI_MISO		12
+#define SPI_SCK			13
+
 const int TWI_ADDRESS_DEFAULT = 0x71;
 const int BAUD_DEFAULT  = 103;  // 9600 for 8MHz, 2x speed
 const int BRIGHTNESS_DEFAULT = 255;  // Full brightness
