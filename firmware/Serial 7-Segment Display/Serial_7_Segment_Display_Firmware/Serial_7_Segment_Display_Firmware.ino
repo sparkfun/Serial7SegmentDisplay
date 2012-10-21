@@ -26,22 +26,9 @@
 #include <Wire.h>  // Handles I2C
 #include <EEPROM.h>  // Brightness, Baud rate, and I2C address are stored in EEPROM
 #include "settings.h"  // Defines command bytes, EEPROM addresses, display data
+#include "SevSeg.h" //Library to control generic seven segment displays
 
-/* Digit Defines 
-   Used with cathodes[] array (below) to reference specific segments */
-const int A_SEG = 0;
-const int B_SEG = 1;
-const int C_SEG = 2;
-const int D_SEG = 3;
-const int E_SEG = 4;
-const int F_SEG = 5;
-const int G_SEG = 6;
-const int DP_SEG = 7;
-
-/* Pin defines for LED anodes and cathodes */
-const byte anodes[6] = {A2, A3, 3, 4, 2, 9};  // Dig0, Dig1, Dig2, Dig3, Colon, Apostrophe
-const byte cathodes[8] = {8, A0, 6, A1, 23, 7, 5, 22};  // A, B, C, D, E, F, G, DP
-//const byte cathodes[8] = {6, 8, A0, A1, 23, 7, 5, 22};  // A, B, C, D, E, F, G, DP
+SevSeg myDisplay; //Create an instance of the object
 
 /* Struct for circular data buffer
    data received over UART, SPI and I2C are all sent into a single buffer */
@@ -59,7 +46,7 @@ unsigned char commandMode = 0;  // Used to indicate if a commandMode byte has be
    and cursor for overall display */
 struct display
 {
-  unsigned char digits[4];
+  char digits[4];
   unsigned char decimals;
   unsigned char cursor;
 } display;  // displays be displays
@@ -151,20 +138,6 @@ void setup()
   buffer.head = 0;  // Initialize buffer values
   buffer.tail = 0;  
   
-  /* Initialize anode pin states to OUTPUTS, all LOWs */
-  for (int i=0; i<6; i++)
-  {
-    pinMode(anodes[i], OUTPUT);
-    digitalWrite(anodes[i], LOW);
-  }
-  
-  /* Initialize cathode pin states to OUTPUTS all HIGHs */
-  for (int i = 0 ; i < 8 ; i++)
-  {
-    pinMode(cathodes[i], OUTPUT);
-    digitalWrite(cathodes[i], HIGH);
-  }
-  
   /* displayPeriod controls the brightness of our display
      read the brightness value from EEPROM and map the 0 */
   displayPeriod = map(EEPROM.read(BRIGHTNESS_ADDRESS), 0, 255, 0, 2000);
@@ -173,7 +146,37 @@ void setup()
   setupUart();   // initialize UART stuff (interrupts, enable, baud)
   setupSPI();    // Initialize SPI stuff (enable, mode, interrupts)
   setupTWI();    // Initialize I2C stuff (address, interrupt, enable)
+  
+  //This pinout is for OpenSegment PCB layout
+  //Declare what pins are connected to the digits
+  int digit1 = 9; //Pin 12 on my 4 digit display
+  int digit2 = 16; //Pin 9 on my 4 digit display
+  int digit3 = 17; //Pin 8 on my 4 digit display
+  int digit4 = 3; //Pin 6 on my 4 digit display
+
+  //Declare what pins are connected to the segments
+  int segA = 14; //Pin 11 on my 4 digit display
+  int segB = 2; //Pin 7 on my 4 digit display
+  int segC = 8; //Pin 4 on my 4 digit display
+  int segD = 6; //Pin 2 on my 4 digit display
+  int segE = 7; //Pin 1 on my 4 digit display
+  int segF = 15; //Pin 10 on my 4 digit display
+  int segG = 4; //Pin 5 on my 4 digit display
+  int segDP= 5; //Pin 3 on my 4 digit display
+
+  int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
+
+  int displayType = COMMON_CATHODE; //Your display is either common cathode or common anode
+
+  //Initialize the SevSeg library with all the pins needed for this type of display
+  myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
     
+  //Only used for testing: Preload the display buffer
+  display.digits[0] = 1;
+  display.digits[1] = 2;
+  display.digits[2] = 3;
+  display.digits[3] = 4;
+
   interrupts();  // Turn interrupts on, and les' go
 }
 
@@ -182,15 +185,10 @@ void loop()
 {
   int delayTimer = 0;
   
-  for (int i = 0 ; i < 5 ; i++)  // Run through this once for each digit and once for the decimals
-  {
-    displayDigit(display.digits[i], i);  // Set all the segments correctly
-    
-    delayMicroseconds(displayPeriod+1);  // Blocking delay while the digit is on
-  }
-  
-  clearDisplay();  // Clear the display, this is how we adjust brightness
-  /* delay for whats left of our maximum displayPeriod */
+//    displayDigit(display.digits[i], i);  // Set all the segments correctly
+  myDisplay.DisplayString(display.digits, 3); //(numberToDisplay, decimal point location)
+
+  // To control the brightness, delay for what's left of our maximum displayPeriod
   delayMicroseconds((displayPeriodMax - 5 * displayPeriod) + 1); 
 }
 
@@ -415,7 +413,7 @@ void factoryReset()
    e.g. displayDigit(8, 0) makes the left-most digit display '8'.
    displayDigit('b', 3) displays 'b' on 3. 
    if digit=4, the colon and apostrophes are controlled */
-void displayDigit(byte number, byte digit)
+/*void displayDigit(byte number, byte digit)
 {
   clearDisplay();  // Clear the display
   digitalWrite(anodes[digit], HIGH);  // pull the proper anode HIGH
@@ -447,14 +445,14 @@ void displayDigit(byte number, byte digit)
           digitalWrite(cathodes[i], LOW);  // if the bit is set, turn on that segment
       }
     }
-    /* finally, if the decimal bit for this digit is set, turn on the DP */
+    //finally, if the decimal bit for this digit is set, turn on the DP 
     if ((display.decimals & (1<<digit)))
       digitalWrite(cathodes[DP_SEG], LOW);
   }
-}
+}*/
 
 /* clearDisplay(): Turns off everything! */
-void clearDisplay()
+/*void clearDisplay()
 {
   for (int i=0; i<6; i++)
     digitalWrite(anodes[i], LOW);  // anodes LOW
@@ -463,4 +461,4 @@ void clearDisplay()
   {
     digitalWrite(cathodes[i], HIGH);  // cathodes HIGH
   }
-}
+}*/
