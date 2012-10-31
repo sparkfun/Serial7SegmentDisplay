@@ -46,6 +46,12 @@ void loop() {
   //int negativeCycles = cycles * -1;
   //sprintf(tempString, "%4d", negativeCycles); //Shows a negative sign infront of right adjusted number
 
+  //Note: This method works well as long as your number is less than or equal to 4 digits.
+  //14422 will cause the display to wrap (5 digits)
+  //-5766 will cause the display to wrap (5 digits)
+  //To fix this, send a 'v' character or look at how to control the digit placement
+  //https://github.com/sparkfun/Serial7SegmentDisplay/wiki/Basic-Usage#wiki-cursor
+
   Serial7Segment.print(tempString);
 
 //  delay(1);
