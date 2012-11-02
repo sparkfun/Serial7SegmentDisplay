@@ -68,24 +68,6 @@ ISR(SPI_STC_vect)
   interrupts();  // Fine, you were saying?
 }
 
-// I2C byte receive interrupt routine
-// Note: this isn't an ISR. I'm using wire library (because it just works), so
-// Wire.onReceive(twiReceive); should be called
-void twiReceive(int rxCount)
-{
-  while(Wire.available() > 0)  // Do this while data is available in Wire buffer
-  {
-    unsigned int i = (buffer.head + 1) % BUFFER_SIZE;  // read buffer head position and increment
-    unsigned char c = Wire.read();  // Read data byte into c, from Wire data buffer
-
-    if (i != buffer.tail)  // As long as the buffer isn't full, we can store the data in buffer
-    {
-      buffer.data[buffer.head] = c;  // Store the data into the buffer's head
-      buffer.head = i;  // update buffer head, since we stored new data
-    }    
-  }
-}
-
 // The display data is updated on a Timer interrupt
 ISR(TIMER1_COMPA_vect)
 {
@@ -128,15 +110,11 @@ void loop()
 }
 
 // This is effectively the UART0 byte received interrupt routine
-//ISR(USART_RX_vect)
 void serialEvent()
 {
   while (Serial.available()) 
   {
-    //noInterrupts();  // We'll be quick...
-
     unsigned int i = (buffer.head + 1) % BUFFER_SIZE;  // read buffer head position and increment
-    //    unsigned char c = UDR0;  // Read data byte into c, from UART0 data register
     unsigned char c = Serial.read();  // Read data byte into c, from UART0 data register
 
     if (i != buffer.tail)  // As long as the buffer isn't full, we can store the data in buffer
@@ -144,8 +122,24 @@ void serialEvent()
       buffer.data[buffer.head] = c;  // Store the data into the buffer's head
       buffer.head = i;  // update buffer head, since we stored new data
     }
+  }
+}
 
-    //interrupts();  // Okay, resume interrupts
+// I2C byte receive interrupt routine
+// Note: this isn't an ISR. I'm using wire library (because it just works), so
+// Wire.onReceive(twiReceive); should be called
+void twiReceive(int rxCount)
+{
+  while(Wire.available())  // Do this while data is available in Wire buffer
+  {
+    unsigned int i = (buffer.head + 1) % BUFFER_SIZE;  // read buffer head position and increment
+    unsigned char c = Wire.read();  // Read data byte into c, from Wire data buffer
+
+    if (i != buffer.tail)  // As long as the buffer isn't full, we can store the data in buffer
+    {
+      buffer.data[buffer.head] = c;  // Store the data into the buffer's head
+      buffer.head = i;  // update buffer head, since we stored new data
+    }    
   }
 }
 
