@@ -31,7 +31,7 @@
 SevSeg myDisplay; //Create an instance of the object
 
 //Define global variables that will hold the user's settings from EEPROM
-byte settingBrightness;
+unsigned int settingBrightness;
 byte settingUARTSpeed;
 byte settingTWIAddress;
 
@@ -55,10 +55,6 @@ struct display
   unsigned char cursor;
 } 
 display;  // displays be displays
-
-// displayPeriod conrols the brightness of the display it controls how long in microseconds a display will be active
-const int displayPeriodMax = 10000;  //microseconds - how long to run through one cycle of display PWM
-int displayPeriod = 2000;  // microseconds, maximum of 3000 - length of time each digit on display is active
 
 // SPI byte received interrupt routine
 ISR(SPI_STC_vect)
@@ -126,18 +122,15 @@ void setup()
   display.digits[1] = 2;
   display.digits[2] = 3;
   display.digits[3] = 4;
+
+  settingBrightness = 250;
+  settingBrightness = map(settingBrightness, 0, 255, 0, FRAMEPERIOD); //map settingBrightness to 0 to the max which is framePeriod
 }
 
 // The display is constantly PWM'd in the loop()
 void loop()
 {
-  int delayTimer = 0;
-
-  //    displayDigit(display.digits[i], i);  // Set all the segments correctly
-  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
-
-  // To control the brightness, delay for what's left of our maximum displayPeriod
-  delayMicroseconds((displayPeriodMax - 5 * displayPeriod) + 1); 
+  myDisplay.DisplayString(display.digits, display.decimals, settingBrightness); //(numberToDisplay, decimal point location, fraction of time to be on)
 }
 
 // This is effectively the UART0 byte received interrupt routine
@@ -149,9 +142,9 @@ void serialEvent()
     //noInterrupts();  // We'll be quick...
 
     unsigned int i = (buffer.head + 1) % BUFFER_SIZE;  // read buffer head position and increment
-//    unsigned char c = UDR0;  // Read data byte into c, from UART0 data register
+    //    unsigned char c = UDR0;  // Read data byte into c, from UART0 data register
     unsigned char c = Serial.read();  // Read data byte into c, from UART0 data register
-  
+
     if (i != buffer.tail)  // As long as the buffer isn't full, we can store the data in buffer
     {
       buffer.data[buffer.head] = c;  // Store the data into the buffer's head
@@ -181,41 +174,35 @@ void updateBufferData()
   }
   else if (c == RESET_CMD)  // If the received char is the reset command
   {
-    for (int i=0; i<4; i++)
+    for(int i = 0 ; i < 4 ; i++)
       display.digits[i] = 'x';  // clear all digits
     display.decimals = 0;  // clear all decimals
     display.cursor = 0;  // reset the cursor
   }
   else if (commandMode != 0)  // Otherwise, if data is non-displayable and we're in a commandMode
   {
-    unsigned int baud = 103;  // Default to 9600 if non-usable data received
-
     switch (commandMode)
     {
     case DECIMAL_CMD:  // Decimal setting mode
       display.decimals = c;  // decimals are set by one byte
       break;
     case BRIGHTNESS_CMD:  // Brightness setting mode
-      displayPeriod = map(c, 0, 255, 0, 2000);  // Adjust the amount of time digits are on
       EEPROM.write(BRIGHTNESS_ADDRESS, c);    // write the new value to EEPROM
+      settingBrightness = map(c, 0, 255, 0, FRAMEPERIOD);  // Adjust the brightness of the display, from 0 to framePeriod
+      Serial.print("B:");
+      Serial.println(settingBrightness);
       break;
     case BAUD_CMD:  // Baud setting mode 
-      if(c >= BAUD_2400 || c <= BAUD_1000000) 
-      {
-        EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
-        setupUART(); //With this new EEPROM address, go setup the UART to run at this new setting
-      }
+      EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
+      setupUART(); //Checks to see if this baud rate is valis and turns on UART at this speed
       break;
     case CURSOR_CMD:  // Set the cursor
       if (c <= 3)  // Limited error checking, if >3 cursor command will have no effect
         display.cursor = c;  // Update the cursor value
       break;
     case TWI_ADDRESS_CMD:  // Set the I2C Address
-      if ((c > 0) && (c < 0x7F))  
-      { // As long as the address value is valid msb can't be set, can't be 0 (general call)
-        EEPROM.write(TWI_ADDRESS_ADDRESS, c);  // Update the EEPROM value
-        Wire.begin(c);  // on-the fly I2C address update
-      }
+      EEPROM.write(TWI_ADDRESS_ADDRESS, c); // Update the EEPROM value
+      setupTWI(); //Checks to see if I2C address is valid an begins I2C
       break;
     case FACTORY_RESET_CMD:  // Factory reset
       setDefaultSettings();  // Reset baud, brightness, and TWI address
@@ -259,12 +246,12 @@ void setupDisplay()
   settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
   //Because the default setting is in fact 255, we should not run this loop every power up
   /*if(settingBrightness == 255) {
-    settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
-    EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
-  }*/ 
-  settingBrightness = map(settingBrightness, 0, 255, 0, 2000); //map settingBrightness to 0 to 2000
+   settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
+   EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
+   }*/
+  settingBrightness = map(settingBrightness, 0, 255, 0, FRAMEPERIOD); //map settingBrightness to 0 to framePeriod
 
-  // Set the initial state of displays and decimals 'x' =  off
+    // Set the initial state of displays and decimals 'x' =  off
   display.digits[0] = 'x';
   display.digits[1] = 'x';
   display.digits[2] = 'x';
@@ -298,7 +285,7 @@ void setupDisplay()
 
   //Initialize the SevSeg library with all the pins needed for this type of display
   myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
-  
+
 }
 
 //This sets up the UART with the stored baud rate in EEPROM
@@ -317,39 +304,39 @@ void setupUART()
   switch(settingUARTSpeed)
   {
     case(BAUD_2400):
-      Serial.begin(2400);
-      break;
+    Serial.begin(2400);
+    break;
     case(BAUD_4800):
-      Serial.begin(4800);
-      break;
+    Serial.begin(4800);
+    break;
     case(BAUD_9600):
-      Serial.begin(9600);
-      break;
+    Serial.begin(9600);
+    break;
     case(BAUD_19200):
-      Serial.begin(19200);
-      break;
+    Serial.begin(19200);
+    break;
     case(BAUD_38400):
-      Serial.begin(38400);
-      break;
+    Serial.begin(38400);
+    break;
     case(BAUD_57600):
-      Serial.begin(57600);
-      break;
+    Serial.begin(57600);
+    break;
     case(BAUD_115200):
-      Serial.begin(115200);
-      break;
+    Serial.begin(115200);
+    break;
     case(BAUD_250000):
-      Serial.begin(250000);
-      break;
+    Serial.begin(250000);
+    break;
     case(BAUD_500000):
-      Serial.begin(500000);
-      break;
+    Serial.begin(500000);
+    break;
     case(BAUD_1000000):
-      Serial.begin(1000000);
-      break;
-    default:
-      //We should never reach this state, but if we do
-      Serial.begin(9600);    
-      break;
+    Serial.begin(1000000);
+    break;
+  default:
+    //We should never reach this state, but if we do
+    Serial.begin(9600);    
+    break;
   }
 
 }
@@ -427,7 +414,7 @@ void constantDisplay (char *theString, long amountOfTime)
 {
   long startTime = millis();
   while( (millis() - startTime) < amountOfTime)
-    myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
+    myDisplay.DisplayString(theString, 0, settingBrightness); //(numberToDisplay, decimal point location)
 }
 
 // In case of emergency, resets all the system settings to safe values
@@ -443,4 +430,6 @@ void setDefaultSettings(void)
   //Reset the I2C address to the default 0x71
   EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
 }
+
+
 
