@@ -54,7 +54,7 @@ void loop() {
 
   Serial7Segment.print(tempString);
 
-//  delay(1);
+//  delay(10);
 }
 
 
