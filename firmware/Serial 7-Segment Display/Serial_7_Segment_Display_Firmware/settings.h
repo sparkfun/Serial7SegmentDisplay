@@ -8,13 +8,15 @@
 #define BAUD_2400	0
 #define BAUD_4800	1
 #define BAUD_9600	2
-#define BAUD_19200	3
-#define BAUD_38400	4
-#define BAUD_57600	5
-#define BAUD_115200	6
-#define BAUD_250000	7
-#define BAUD_500000	8
-#define BAUD_1000000	9
+#define BAUD_14400	3
+#define BAUD_19200	4
+#define BAUD_38400	5
+#define BAUD_57600	6
+#define BAUD_76800	7
+#define BAUD_115200	8
+#define BAUD_250000	9
+#define BAUD_500000	10
+#define BAUD_1000000	11
 
 const int TWI_ADDRESS_DEFAULT = 0x71;
 const int BAUD_DEFAULT  = BAUD_9600;  // 9600 for 8MHz, 2x speed

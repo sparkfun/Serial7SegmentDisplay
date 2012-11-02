@@ -30,11 +30,6 @@
 
 SevSeg myDisplay; //Create an instance of the object
 
-//Define global variables that will hold the user's settings from EEPROM
-//unsigned int settingBrightness;
-byte settingUARTSpeed;
-byte settingTWIAddress;
-
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
 struct dataBuffer
 {
@@ -242,9 +237,9 @@ void setupDisplay()
   //Determine the display brightness
   byte settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
   if(settingBrightness > BRIGHTNESS_DEFAULT) {
-   settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
-   EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
-   }
+    settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
+    EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
+  }
   myDisplay.SetBrightness(settingBrightness); //Set the display to 100% bright
 
   // Set the initial state of displays and decimals 'x' =  off
@@ -289,7 +284,7 @@ void setupUART()
 {
   //Read what the current UART speed is from EEPROM memory
   //Default is 9600
-  settingUARTSpeed = EEPROM.read(BAUD_ADDRESS);
+  byte settingUARTSpeed = EEPROM.read(BAUD_ADDRESS);
   if(settingUARTSpeed > BAUD_1000000) //Check to see if the baud rate has ever been set
   {
     settingUARTSpeed = BAUD_9600; //Reset UART to 9600 if there is no baud rate stored
@@ -308,6 +303,9 @@ void setupUART()
     case(BAUD_9600):
     Serial.begin(9600);
     break;
+    case(BAUD_14400):
+    Serial.begin(14400);
+    break;
     case(BAUD_19200):
     Serial.begin(19200);
     break;
@@ -316,6 +314,9 @@ void setupUART()
     break;
     case(BAUD_57600):
     Serial.begin(57600);
+    break;
+    case(BAUD_76800):
+    Serial.begin(76800);
     break;
     case(BAUD_115200):
     Serial.begin(115200);
@@ -381,7 +382,7 @@ void checkEmergencyReset(void)
 
   //Quick pin check
   if(digitalRead(0) == HIGH) return;
-  
+
   myDisplay.SetBrightness(100); //Set display to 100% brightness during emergency reset so we can see it
 
   //Wait 2 seconds, displaying reset-ish things while we wait
@@ -397,7 +398,7 @@ void checkEmergencyReset(void)
   //If we make it here, then RX pin stayed low the whole time
   setDefaultSettings(); //Reset baud rate, brightness setting and TWI address
 
-  //Now sit in a loop indicating system is now at 9600bps
+    //Now sit in a loop indicating system is now at 9600bps
   while(digitalRead(0) == LOW)
   {
     constantDisplay("000-", 500);
@@ -412,12 +413,7 @@ void constantDisplay (char *theString, long amountOfTime)
 {
   long startTime = millis();
   while( (millis() - startTime) < amountOfTime)
-  {
-    for(byte x = 0 ; x < 10 ; x++)
-    {
-      myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
-    }
-  }
+    myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
 }
 
 // In case of emergency, resets all the system settings to safe values
@@ -426,12 +422,12 @@ void setDefaultSettings(void)
 {
   //Reset UART to 9600bps
   EEPROM.write(BAUD_ADDRESS, BAUD_DEFAULT);
-  settingUARTSpeed = BAUD_DEFAULT;
 
   //Reset system brightness to the brightest level
   EEPROM.write(BRIGHTNESS_ADDRESS, BRIGHTNESS_DEFAULT);
   myDisplay.SetBrightness(BRIGHTNESS_DEFAULT);
-  
+
   //Reset the I2C address to the default 0x71
   EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
 }
+
