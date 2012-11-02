@@ -189,8 +189,6 @@ void updateBufferData()
     case BRIGHTNESS_CMD:  // Brightness setting mode
       EEPROM.write(BRIGHTNESS_ADDRESS, c);    // write the new value to EEPROM
       settingBrightness = map(c, 0, 255, 0, FRAMEPERIOD);  // Adjust the brightness of the display, from 0 to framePeriod
-      Serial.print("B:");
-      Serial.println(settingBrightness);
       break;
     case BAUD_CMD:  // Baud setting mode 
       EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
