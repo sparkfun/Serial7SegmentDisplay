@@ -9,6 +9,10 @@
 
  This is example code that shows how to display basic numbers on the display.
  
+ Note: This code expects the display to be listening at 9600bps. If your display is not at 9600bps, you can
+ do a software or hardware reset. See the Wiki for more info: 
+ http://github.com/sparkfun/Serial7SegmentDisplay/wiki/Special-Commands#wiki-baud
+ 
  To get this code to work, attached an Serial7Segment to an Arduino Uno using the following pins:
  Pin 7 on Uno (software serial RX) to TX on Serial7Segment
  Pin 8 on Uno to RX on Serial7Segment
@@ -29,14 +33,14 @@ void setup() {
   Serial.println("OpenSegment Example Code");
 
   Serial7Segment.begin(9600); //Talk to the Serial7Segment at 9600 bps
-
-  //Reset the display
-  Serial7Segment.write('v'); //This forces the cursor to return to the beginning of the display
+  Serial7Segment.write('v'); //Reset the display - this forces the cursor to return to the beginning of the display
 }
 
-void loop() {
+void loop() 
+{
+  cycles++; //Counting cycles! Yay!
   Serial.print("Cycle: ");
-  Serial.println(cycles++);
+  Serial.println(cycles);
   
   char tempString[10]; //Used for sprintf
   sprintf(tempString, "%4d", cycles); //Convert deciSecond into a string that is right adjusted
@@ -46,9 +50,15 @@ void loop() {
   //int negativeCycles = cycles * -1;
   //sprintf(tempString, "%4d", negativeCycles); //Shows a negative sign infront of right adjusted number
 
-  Serial7Segment.print(tempString);
+  //Note: This method works well as long as your number is less than or equal to 4 digits.
+  //14422 will cause the display to wrap (5 digits)
+  //-5766 will cause the display to wrap (5 digits)
+  //To fix this, send a 'v' character or look at how to control the digit placement
+  //https://github.com/sparkfun/Serial7SegmentDisplay/wiki/Basic-Usage#wiki-cursor
 
-//  delay(1);
+  Serial7Segment.print(tempString); //Send serial string out the soft serial port to the S7S
+
+//  delay(10);
 }
 
 

@@ -4,15 +4,28 @@
 #define SPI_MISO		12
 #define SPI_SCK			13
 
-const int TWI_ADDRESS_DEFAULT = 0x71;
-const int BAUD_DEFAULT  = 103;  // 9600 for 8MHz, 2x speed
-const int BRIGHTNESS_DEFAULT = 255;  // Full brightness
+//Define the different baud rate levels
+#define BAUD_2400	0
+#define BAUD_4800	1
+#define BAUD_9600	2
+#define BAUD_14400	3
+#define BAUD_19200	4
+#define BAUD_38400	5
+#define BAUD_57600	6
+#define BAUD_76800	7
+#define BAUD_115200	8
+#define BAUD_250000	9
+#define BAUD_500000	10
+#define BAUD_1000000	11
 
-/* EEPROM ADDRESSES */
+const int TWI_ADDRESS_DEFAULT = 0x71;
+const int BAUD_DEFAULT  = BAUD_9600;  // 9600 for 8MHz, 2x speed
+const int BRIGHTNESS_DEFAULT = 100;  // 100%, full brightness
+
+//Internal EEPROM locations for the user settings
 const unsigned char BRIGHTNESS_ADDRESS = 0;
-const unsigned char BAUD_ADDRESS_L = 2;
-const unsigned char BAUD_ADDRESS_H = 3;
-const unsigned char TWI_ADDRESS_ADDRESS = 4;  // !!! NEW
+const unsigned char BAUD_ADDRESS = 1;
+const unsigned char TWI_ADDRESS_ADDRESS = 2;
 
 /* Command Modes */
 const unsigned char RESET_CMD         = 0x76;
