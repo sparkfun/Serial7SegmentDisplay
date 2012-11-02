@@ -30,7 +30,7 @@
 
 SevSeg myDisplay; //Create an instance of the object
 
-//Define global variables that will hold the user's settings from EEPROMI
+//Define global variables that will hold the user's settings from EEPROM
 byte settingBrightness;
 byte settingUARTSpeed;
 byte settingTWIAddress;
@@ -109,59 +109,17 @@ ISR(TIMER1_COMPA_vect)
 
 void setup()
 {  
-  /*
-  pinMode(10, OUTPUT);
-  digitalWrite(10, LOW);
-  delayMicroseconds(1);
-  pinMode(10, INPUT_PULLUP);
-  */
+  setupDisplay(); //Initialize display stuff (common cathode, digits, brightness, etc)
 
-  // Set the initial state of displays and decimals 'x' =  off
-  display.digits[0] = 'x';
-  display.digits[1] = 'x';
-  display.digits[2] = 'x';
-  display.digits[3] = 'x';
-  display.decimals = 0x00;  // Turn all decimals off
-  display.cursor = 0;  // Set cursor to first (left-most) digit
-
-  buffer.head = 0;  // Initialize buffer values
-  buffer.tail = 0;  
-
-  //This pinout is for OpenSegment PCB layout
-  //Declare what pins are connected to the digits
-  int digit1 = 9; //Pin 12 on my 4 digit display
-  int digit2 = 16; //Pin 9 on my 4 digit display
-  int digit3 = 17; //Pin 8 on my 4 digit display
-  int digit4 = 3; //Pin 6 on my 4 digit display
-
-  //Declare what pins are connected to the segments
-  int segA = 14; //Pin 11 on my 4 digit display
-  int segB = 2; //Pin 7 on my 4 digit display
-  int segC = 8; //Pin 4 on my 4 digit display
-  int segD = 6; //Pin 2 on my 4 digit display
-  int segE = 7; //Pin 1 on my 4 digit display
-  int segF = 15; //Pin 10 on my 4 digit display
-  int segG = 4; //Pin 5 on my 4 digit display
-  int segDP= 5; //Pin 3 on my 4 digit display
-
-  int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
-
-  int displayType = COMMON_CATHODE; //Your display is either common cathode or common anode
-
-  //Initialize the SevSeg library with all the pins needed for this type of display
-  myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
-
-  //We need to check emergency after we have initialized the display so that we can use the display during factory reset
+  //We need to check emergency after we have initialized the display so that we can use the display during an emergency reset
   checkEmergencyReset(); //Look to see if the RX pin is being pulled low
 
-  readSystemSettings(); //Load all the system settings from EEPROM
   setupTimer();  // Setup timer to control interval reading from buffer
   setupUART();   // initialize UART stuff (interrupts, enable, baud)
   setupSPI();    // Initialize SPI stuff (enable, mode, interrupts)
   setupTWI();    // Initialize I2C stuff (address, interrupt, enable)
 
   interrupts();  // Turn interrupts on, and les' go
-
 
   //Preload the display buffer, should only be used during code development
   display.digits[0] = 1;
@@ -294,10 +252,68 @@ void setupTimer()
   TIMSK1 = (1<<OCIE1A);  // Enable interrupt on compare
 }
 
+//Sets up the hardware pins to control the 7 segments and display type
+void setupDisplay()
+{
+  //Determine the display brightness
+  settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
+  //Because the default setting is in fact 255, we should not run this loop every power up
+  /*if(settingBrightness == 255) {
+    settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
+    EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
+  }*/ 
+  settingBrightness = map(settingBrightness, 0, 255, 0, 2000); //map settingBrightness to 0 to 2000
+
+  // Set the initial state of displays and decimals 'x' =  off
+  display.digits[0] = 'x';
+  display.digits[1] = 'x';
+  display.digits[2] = 'x';
+  display.digits[3] = 'x';
+  display.decimals = 0x00;  // Turn all decimals off
+  display.cursor = 0;  // Set cursor to first (left-most) digit
+
+  buffer.head = 0;  // Initialize buffer values
+  buffer.tail = 0;  
+
+  //This pinout is for OpenSegment PCB layout
+  //Declare what pins are connected to the digits
+  int digit1 = 9; //Pin 12 on my 4 digit display
+  int digit2 = 16; //Pin 9 on my 4 digit display
+  int digit3 = 17; //Pin 8 on my 4 digit display
+  int digit4 = 3; //Pin 6 on my 4 digit display
+
+  //Declare what pins are connected to the segments
+  int segA = 14; //Pin 11 on my 4 digit display
+  int segB = 2; //Pin 7 on my 4 digit display
+  int segC = 8; //Pin 4 on my 4 digit display
+  int segD = 6; //Pin 2 on my 4 digit display
+  int segE = 7; //Pin 1 on my 4 digit display
+  int segF = 15; //Pin 10 on my 4 digit display
+  int segG = 4; //Pin 5 on my 4 digit display
+  int segDP= 5; //Pin 3 on my 4 digit display
+
+  int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
+
+  int displayType = COMMON_CATHODE; //Your display is either common cathode or common anode
+
+  //Initialize the SevSeg library with all the pins needed for this type of display
+  myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
+  
+}
+
 //This sets up the UART with the stored baud rate in EEPROM
 void setupUART()
 {
-  //Setup UART
+  //Read what the current UART speed is from EEPROM memory
+  //Default is 9600
+  settingUARTSpeed = EEPROM.read(BAUD_ADDRESS);
+  if(settingUARTSpeed > BAUD_1000000) //Check to see if the baud rate has ever been set
+  {
+    settingUARTSpeed = BAUD_9600; //Reset UART to 9600 if there is no baud rate stored
+    EEPROM.write(BAUD_ADDRESS, settingUARTSpeed);
+  }
+
+  //Initialize the UART
   switch(settingUARTSpeed)
   {
     case(BAUD_2400):
@@ -336,32 +352,6 @@ void setupUART()
       break;
   }
 
-/*  pinMode(0, INPUT);  // RX set as an INPUT
-
-    UCSR0A = (1<<U2X0);  // DOUBLE SPEEEEEEED!
-  UCSR0B = (1<<RXCIE0) | (1<<RXEN0);   // Enable RX, RX complete interrupt
-  UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);  // Asynchronous, no parity, 1 stop bit, 8 bit
-
-  //EEPROM.write(BAUD_ADDRESS_L, 0xFF);  // These are useful if you need to reset...
-  //EEPROM.write(BAUD_ADDRESS_H, 0xFF);  // ...the baud rate values in EEPROM
-
-  // read the baud rate setting from EEPROM
-  unsigned int baud = (EEPROM.read(BAUD_ADDRESS_H)<<8) | EEPROM.read(BAUD_ADDRESS_L);
-
-  // Check if the baud rate setting is valid
-  if ((baud==416)||(baud==207)||(baud==103)||(baud==68)||(baud==51)||(baud==34)
-    ||(baud==25)||(baud==16)||(baud==12)||(baud==8)||(baud==3)||(baud==1)||(baud==0))
-  {
-    UBRR0 = baud;  // and update the UBRR0 !!! This is dependent on double-speed and 8MHz clock
-  }
-  else  // if the baud rate setting was invalid, default to 9600
-  {
-    baud = 103;  // !!! dependent on 8MHz, double speed uart
-    UBRR0 = baud;  // default to 9600
-    EEPROM.write(BAUD_ADDRESS_L, baud);  // Update EEPROM to reflect 9600 buad
-    EEPROM.write(BAUD_ADDRESS_H, 0);
-  }
-  */
 }
 // setupSPI(): Initialize SPI, sets up hardware pins and enables spi and receive interrupt
 // SPI is set to MODE 0 (CPOL=0, CPHA=0), slave mode, LSB first
@@ -398,26 +388,6 @@ void setupTWI()
   Wire.onReceive(twiReceive);  // setup interrupt routine for when data is received
 }
 
-// factoryReset(): Uhoh! If something breaks, try sending a factory reset command to the device
-// This will reset baud, TWI address, and brightness to default values
-/*void factoryReset()
-{
-  // Reset Baud (9600)
-  unsigned int baud = BAUD_DEFAULT;
-  UBRR0 = baud;
-  EEPROM.write(BAUD_ADDRESS_L, (unsigned char)(baud & 0xFF));
-  EEPROM.write(BAUD_ADDRESS_H, (unsigned char)(baud >> 8));
-
-  // Reset TWI Address (0x71)
-  Wire.begin(TWI_ADDRESS_DEFAULT);
-  EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
-
-  // Reset Brightness (FULL BRIGHNESS!)
-  displayPeriod = map(255, 0, 255, 0, 2000);
-  EEPROM.write(BRIGHTNESS_ADDRESS, BRIGHTNESS_DEFAULT);
-
-}*/
-
 //Check to see if we need an emergency system reset
 //Scan the RX pin for 2 seconds
 //If it's low the entire time, then reset the system settings
@@ -440,7 +410,7 @@ void checkEmergencyReset(void)
   }		
 
   //If we make it here, then RX pin stayed low the whole time
-  //setDefaultSettings(); //Reset baud, escape characters, escape number, system mode
+  setDefaultSettings(); //Reset baud, escape characters, escape number, system mode
 
   //Now sit in a loop indicating system is now at 9600bps
   while(digitalRead(0) == LOW)
@@ -460,42 +430,8 @@ void constantDisplay (char *theString, long amountOfTime)
     myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
 }
 
-//Reads the current system settings from EEPROM
-//If anything looks weird, reset setting to default value
-void readSystemSettings(void) {
-  //Read what the current UART speed is from EEPROM memory
-  //Default is 9600
-  settingUARTSpeed = EEPROM.read(BAUD_ADDRESS);
-  if(settingUARTSpeed > BAUD_1000000) {
-    settingUARTSpeed = BAUD_9600; //Reset UART to 9600 if there is no speed stored
-    EEPROM.write(BAUD_ADDRESS, settingUARTSpeed);
-  }
-
-  //Determine the display brightness
-  //Default is max brightness (BRIGHTNESS_DEFAULT)
-  settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
-  /*if(settingBrightness == 255) {
-    settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
-    EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
-  }*/ //Because the default setting is in fact 255, we should not run this loop every power up
-  
-  //map settingBrightness to 0 to 2000
-  settingBrightness = map(settingBrightness, 0, 255, 0, 2000);
-
-  //Look up the address for this device
-  //The OpenSegment I2C address can be anything really (but we should probably be following some convention)
-  //Remember, this is only 7 bits. The 8th bit is the read/write flag
-  //Also, the least two bits are controlled by the solder jumpers on the board
-  //Default is 0x71
-  settingTWIAddress = EEPROM.read(TWI_ADDRESS_ADDRESS);
-  if(settingTWIAddress == 255) {
-    settingTWIAddress = TWI_ADDRESS_DEFAULT; //By default, unit's address is 0x3C
-    EEPROM.write(TWI_ADDRESS_ADDRESS, settingTWIAddress);
-  }
-
-}
-
-//Resets all the system settings to safe values
+// In case of emergency, resets all the system settings to safe values
+// This will reset baud, TWI address, and brightness to default values
 void setDefaultSettings(void)
 {
   //Reset UART to 9600bps
