@@ -18,7 +18,7 @@
 
 const int TWI_ADDRESS_DEFAULT = 0x71;
 const int BAUD_DEFAULT  = BAUD_9600;  // 9600 for 8MHz, 2x speed
-const int BRIGHTNESS_DEFAULT = 255;  // Full brightness
+const int BRIGHTNESS_DEFAULT = 100;  // 100%, full brightness
 
 //Internal EEPROM locations for the user settings
 const unsigned char BRIGHTNESS_ADDRESS = 0;

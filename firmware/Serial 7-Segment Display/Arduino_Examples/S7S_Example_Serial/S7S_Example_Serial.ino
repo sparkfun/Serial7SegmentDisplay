@@ -21,26 +21,23 @@
 
 SoftwareSerial Serial7Segment(7, 8); //RX pin, TX pin
 
+char tempString[10]; //Used for sprintf
 byte brightnessLevel = 0;
 
-void setup() {
-
+void setup() 
+{
   Serial.begin(9600);
   Serial.println("OpenSegment Example Code");
 
   Serial7Segment.begin(9600); //Talk to the Serial7Segment at 9600 bps
-
-  //Reset the display
-  Serial7Segment.write('v'); //This forces the cursor to return to the beginning of the display
+  Serial7Segment.write('v'); //Reset the display - this forces the cursor to return to the beginning of the display
 }
 
-void loop() {
-  char tempString[10]; //Used for sprintf
-
-  
+void loop() 
+{
   //Set the display to three different levels to show brightness example
 
-  brightnessLevel = 0;
+  brightnessLevel = 0; //0% brightness
   Serial.print("brightnessLevel: ");
   Serial.println(brightnessLevel);
   Serial7Segment.write(0x7A);  // Brightness control command
@@ -49,7 +46,7 @@ void loop() {
   Serial7Segment.print(tempString);
   delay(2000);
 
-  brightnessLevel = 128;
+  brightnessLevel = 50; //50% brightness
   Serial.print("brightnessLevel: ");
   Serial.println(brightnessLevel);
   Serial7Segment.write(0x7A);  // Brightness control command
@@ -58,7 +55,7 @@ void loop() {
   Serial7Segment.print(tempString);
   delay(2000);
 
-  brightnessLevel = 255;
+  brightnessLevel = 100; //100% brightness
   Serial.print("brightnessLevel: ");
   Serial.println(brightnessLevel);
   Serial7Segment.write(0x7A);  // Brightness control command
@@ -66,8 +63,4 @@ void loop() {
   sprintf(tempString, "b%03d", brightnessLevel); //Convert deciSecond into a string that is right adjusted
   Serial7Segment.print(tempString);
   delay(2000);
-
 }
-
-
-

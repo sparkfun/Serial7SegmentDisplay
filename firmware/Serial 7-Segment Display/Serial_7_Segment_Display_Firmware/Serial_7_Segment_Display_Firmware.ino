@@ -31,7 +31,7 @@
 SevSeg myDisplay; //Create an instance of the object
 
 //Define global variables that will hold the user's settings from EEPROM
-unsigned int settingBrightness;
+//unsigned int settingBrightness;
 byte settingUARTSpeed;
 byte settingTWIAddress;
 
@@ -123,14 +123,13 @@ void setup()
   display.digits[2] = 3;
   display.digits[3] = 4;
 
-  settingBrightness = 250;
-  settingBrightness = map(settingBrightness, 0, 255, 0, FRAMEPERIOD); //map settingBrightness to 0 to the max which is framePeriod
+  myDisplay.SetBrightness(100); //Set the display to 100% bright
 }
 
 // The display is constantly PWM'd in the loop()
 void loop()
 {
-  myDisplay.DisplayString(display.digits, display.decimals, settingBrightness); //(numberToDisplay, decimal point location, fraction of time to be on)
+  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
 }
 
 // This is effectively the UART0 byte received interrupt routine
@@ -188,7 +187,7 @@ void updateBufferData()
       break;
     case BRIGHTNESS_CMD:  // Brightness setting mode
       EEPROM.write(BRIGHTNESS_ADDRESS, c);    // write the new value to EEPROM
-      settingBrightness = map(c, 0, 255, 0, FRAMEPERIOD);  // Adjust the brightness of the display, from 0 to framePeriod
+      myDisplay.SetBrightness(c); //Set the display to this brightness level
       break;
     case BAUD_CMD:  // Baud setting mode 
       EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
@@ -241,15 +240,14 @@ void setupTimer()
 void setupDisplay()
 {
   //Determine the display brightness
-  settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
-  //Because the default setting is in fact 255, we should not run this loop every power up
-  /*if(settingBrightness == 255) {
+  byte settingBrightness = EEPROM.read(BRIGHTNESS_ADDRESS);
+  if(settingBrightness > BRIGHTNESS_DEFAULT) {
    settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
    EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
-   }*/
-  settingBrightness = map(settingBrightness, 0, 255, 0, FRAMEPERIOD); //map settingBrightness to 0 to framePeriod
+   }
+  myDisplay.SetBrightness(settingBrightness); //Set the display to 100% bright
 
-    // Set the initial state of displays and decimals 'x' =  off
+  // Set the initial state of displays and decimals 'x' =  off
   display.digits[0] = 'x';
   display.digits[1] = 'x';
   display.digits[2] = 'x';
@@ -383,6 +381,8 @@ void checkEmergencyReset(void)
 
   //Quick pin check
   if(digitalRead(0) == HIGH) return;
+  
+  myDisplay.SetBrightness(100); //Set display to 100% brightness during emergency reset so we can see it
 
   //Wait 2 seconds, displaying reset-ish things while we wait
   for(uint8_t i = 0 ; i < 10 ; i++)
@@ -395,7 +395,7 @@ void checkEmergencyReset(void)
   }		
 
   //If we make it here, then RX pin stayed low the whole time
-  setDefaultSettings(); //Reset baud, escape characters, escape number, system mode
+  setDefaultSettings(); //Reset baud rate, brightness setting and TWI address
 
   //Now sit in a loop indicating system is now at 9600bps
   while(digitalRead(0) == LOW)
@@ -412,7 +412,12 @@ void constantDisplay (char *theString, long amountOfTime)
 {
   long startTime = millis();
   while( (millis() - startTime) < amountOfTime)
-    myDisplay.DisplayString(theString, 0, settingBrightness); //(numberToDisplay, decimal point location)
+  {
+    for(byte x = 0 ; x < 10 ; x++)
+    {
+      myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
+    }
+  }
 }
 
 // In case of emergency, resets all the system settings to safe values
@@ -421,13 +426,12 @@ void setDefaultSettings(void)
 {
   //Reset UART to 9600bps
   EEPROM.write(BAUD_ADDRESS, BAUD_DEFAULT);
+  settingUARTSpeed = BAUD_DEFAULT;
 
   //Reset system brightness to the brightest level
   EEPROM.write(BRIGHTNESS_ADDRESS, BRIGHTNESS_DEFAULT);
-
+  myDisplay.SetBrightness(BRIGHTNESS_DEFAULT);
+  
   //Reset the I2C address to the default 0x71
   EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
 }
-
-
-
