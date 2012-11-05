@@ -18,6 +18,15 @@
 #define BAUD_500000	10
 #define BAUD_1000000	11
 
+//Bit locations for the decimal, apostrophe and colon control
+//From https://github.com/sparkfun/Serial7SegmentDisplay/wiki/Special-Commands#wiki-decimal
+#define APOSTROPHE  5
+#define COLON       4
+#define DECIMAL4    3
+#define DECIMAL3    2
+#define DECIMAL2    1
+#define DECIMAL1    0
+
 const int TWI_ADDRESS_DEFAULT = 0x71;
 const int BAUD_DEFAULT  = BAUD_9600;  // 9600 for 8MHz, 2x speed
 const int BRIGHTNESS_DEFAULT = 100;  // 100%, full brightness
