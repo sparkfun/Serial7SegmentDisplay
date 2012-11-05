@@ -14,10 +14,10 @@
  individual segments, clear the display, reset the cursor, adjust the display's 
  brightness, UART baud rate, i2c address or factory reset.
  
- Arduino addon: This code should remain with the Serial7Seg Arduino hardware
- addon. New pin defines are required for pins 22 and 23 - PB6:7. Because the
- Serial 7-Segment runs on the ATmega328's internal oscillator, these two pins
- open up for our use.
+ Note: To use the additional pins, PB6 and PB7, on the ATmega328 we have to add 
+ some maps to the pins_arduino.h file. This allows Arduino to identify PB6 and 
+ digital pin 22, and PB7 as digital pin 23. Because the Serial 7-Segment runs on 
+ the ATmega328's internal oscillator, these two pins open up for our use.
  
  Hardware: You can find the Serial 7-Segment Display Schematic here:
  !!! Add schematic link
@@ -29,6 +29,13 @@
 #include "SevSeg.h" //Library to control generic seven segment displays
 
 SevSeg myDisplay; //Create an instance of the object
+
+//This firmware works on two different hardware layouts
+//Serial7Segment was the original and drives the segments directly from the ATmega
+//OpenSegment uses PNP and NPN transistors to drive larger displays
+#define S7S            1
+#define OPENSEGMENT    2
+#define DISPLAY_TYPE S7S
 
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
 struct dataBuffer
@@ -106,7 +113,10 @@ void setup()
 // The display is constantly PWM'd in the loop()
 void loop()
 {
+//  long myTimer = millis();    
   myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+//  Serial.print("Timer: ");
+//  Serial.println(millis() - myTimer);
 }
 
 // This is effectively the UART0 byte received interrupt routine
@@ -247,8 +257,11 @@ void setupDisplay()
   buffer.head = 0;  // Initialize buffer values
   buffer.tail = 0;  
 
-  //This pinout is for OpenSegment PCB layout
   //Declare what pins are connected to the digits
+
+  //This pinout is for OpenSegment PCB layout
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#if DISPLAY_TYPE == OPENSEGMENT
   int digit1 = 9; //Pin 12 on my 4 digit display
   int digit2 = 16; //Pin 9 on my 4 digit display
   int digit3 = 17; //Pin 8 on my 4 digit display
@@ -266,11 +279,49 @@ void setupDisplay()
 
   int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
 
-  int displayType = COMMON_CATHODE; //Your display is either common cathode or common anode
+  int displayType = COMMON_CATHODE; //SparkFun 1" displays are common cathode
 
   //Initialize the SevSeg library with all the pins needed for this type of display
   myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
+#endif
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+  //This pinout is for the original Serial7Segment layout
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#if DISPLAY_TYPE == S7S
+  int digit1 = 16; //Analog 2 is 16
+  int digit2 = 17; //A3 is 17
+  int digit3 = 3;
+  int digit4 = 4;
+
+  //Declare what pins are connected to the segments
+  int segA = 8; //Labeled B on schematic
+  int segB = 14; //Labeled C on schematic
+  int segC = 6; //Labeled A/COL on schematic
+  int segD = A1;
+  int segE = 23; //This is not a standard Arduino pin: Must add PB7 as digital pin 23 to pins_arduino.h
+  int segF = 7; 
+  int segG = 5; //Labeled G/APOS on schematic
+  int segDP= 22; //This is not a standard Arduino pin: Must add PB6 as digital pin 22 to pins_arduino.h
+
+  int digitColon = 2; //The digit is the top side of this LED
+  int segmentColon = 6; //The segment is the bottom side of this LED
+  int digitApostrophe = 9;
+  int segmentApostrophe = 7; //Labeled F on schematic (there is an incorrect label G/APOS)
+
+  int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
+
+  int displayType = COMMON_ANODE; //SparkFun 10mm height displays are common anode
+
+  //Initialize the SevSeg library with all the pins needed for this type of display
+  myDisplay.Begin(displayType, numberOfDigits, 
+    digit1, digit2, digit3, digit4, 
+    digitColon, digitApostrophe, 
+    segA, segB, segC, segD, segE, segF, segG, 
+    segDP,
+    segmentColon, segmentApostrophe);
+#endif
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 }
 
 //This sets up the UART with the stored baud rate in EEPROM

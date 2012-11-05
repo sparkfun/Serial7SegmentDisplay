@@ -80,8 +80,8 @@ static const uint8_t A7 = 21;
 //      (D 4) PD4  6|    |23  PC0 (AI 0)
 //            VCC  7|    |22  GND
 //            GND  8|    |21  AREF
-//            PB6  9|    |20  AVCC
-//            PB7 10|    |19  PB5 (D 13)
+//      (D22) PB6  9|    |20  AVCC
+//      (D23) PB7 10|    |19  PB5 (D 13)
 // PWM+ (D 5) PD5 11|    |18  PB4 (D 12)
 // PWM+ (D 6) PD6 12|    |17  PB3 (D 11) PWM
 //      (D 7) PD7 13|    |16  PB2 (D 10) PWM
@@ -153,6 +153,8 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PC,
 	PC,
 	PC,
+	PC, //Add ADC6 as A6
+	PC, //Add ADC7 as A7
 	PB, //Add PB6 as D22
 	PB, //Add PB7 as D23
 };
@@ -178,6 +180,8 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV(3),
 	_BV(4),
 	_BV(5),
+	_BV(6), //Add ADC6 as A6
+	_BV(7), //Add ADC7 as A7
 	_BV(6), //Add PB6 as D22
 	_BV(7), //Add PB7 as D23
 };
