@@ -20,6 +20,9 @@
   Boston, MA  02111-1307  USA
 
   $Id: wiring.h 249 2007-02-03 16:52:51Z mellis $
+  
+  11-4-2012: Added pin definitions for PB6 and PB7 (oscillator pins)
+  to map to D22 and D23.
 */
 
 #ifndef Pins_Arduino_h
@@ -150,10 +153,8 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PC,
 	PC,
 	PC,
-	PC,
-	PC,
-	PB, /* 20 PB6 */
-	PB,	// PB7
+	PB, //Add PB6 as D22
+	PB, //Add PB7 as D23
 };
 
 const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
@@ -177,10 +178,8 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV(3),
 	_BV(4),
 	_BV(5),
-	_BV(6),
-	_BV(7),	
-	_BV(6),	// PB6
-	_BV(7),	// PB7
+	_BV(6), //Add PB6 as D22
+	_BV(7), //Add PB7 as D23
 };
 
 const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
@@ -222,7 +221,8 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
-	NOT_ON_TIMER,
+	NOT_ON_TIMER, //Adding PB6 as D22
+	NOT_ON_TIMER, //Adding PB7 as D23
 };
 
 #endif
