@@ -35,7 +35,7 @@ SevSeg myDisplay; //Create an instance of the object
 //OpenSegment uses PNP and NPN transistors to drive larger displays
 #define S7S            1
 #define OPENSEGMENT    2
-#define DISPLAY_TYPE S7S
+#define DISPLAY_TYPE OPENSEGMENT
 
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
 struct dataBuffer
