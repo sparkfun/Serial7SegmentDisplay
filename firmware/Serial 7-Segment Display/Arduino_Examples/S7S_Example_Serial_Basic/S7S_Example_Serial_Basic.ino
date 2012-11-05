@@ -58,7 +58,7 @@ void loop()
 
   Serial7Segment.print(tempString); //Send serial string out the soft serial port to the S7S
 
-//  delay(10);
+  delay(10);
 }
 
 
