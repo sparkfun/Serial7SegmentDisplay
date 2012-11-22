@@ -15,7 +15,6 @@
  http://github.com/sparkfun/Serial7SegmentDisplay/wiki/Special-Commands#wiki-baud
  
  To get this code to work, attached an Serial7Segment to an Arduino Uno using the following pins:
- Pin 7 on Uno (software serial RX) to TX on Serial7Segment
  Pin 8 on Uno to RX on Serial7Segment
  VIN to PWR
  GND to GND
@@ -39,8 +38,6 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial Serial7Segment(7, 8); //RX pin, TX pin
-
-int cycles = 0;
 
 void setup() {
 

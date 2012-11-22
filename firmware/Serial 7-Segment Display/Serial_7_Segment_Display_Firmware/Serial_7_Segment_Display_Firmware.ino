@@ -118,35 +118,7 @@ void setup()
 // The display is constantly PWM'd in the loop()
 void loop()
 {
-  /*analogValue6 = analogRead(A6);
-  analogValue7 = analogRead(A7);*/
-  
-  //Serial.print("A6: ");
-  //Serial.print(analogValue6);
-  //Serial.print(" A7: ");
-  //Serial.print(analogValue7);
-
-  //Do calculation for 1st voltage meter
-  /*float fvoltage6 = ((analogValue6 * 50) / (float)1024);
-  int voltage6 = round(fvoltage6);
-  display.digits[0] = voltage6 / 10;
-  display.digits[1] = voltage6 % 10;
-
-  //Do calculation for 2nd voltage meter
-  float fvoltage7 = ((analogValue7 * 50) / (float)1024);
-  int voltage7 = round(fvoltage7);
-  display.digits[2] = voltage7 / 10;
-  display.digits[3] = voltage7 % 10;
-
-  display.decimals = ((1<<DECIMAL1) | (1<<DECIMAL3)); //Turn on the decimals next to digit1 and digit3
   myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
-  */
-  
-  
-//  long myTimer = millis();    
-  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
-//  Serial.print("Timer: ");
-//  Serial.println(millis() - myTimer);
 }
 
 // This is effectively the UART0 byte received interrupt routine
