@@ -35,7 +35,7 @@ SevSeg myDisplay; //Create an instance of the object
 //OpenSegment uses PNP and NPN transistors to drive larger displays
 #define S7S            1
 #define OPENSEGMENT    2
-#define DISPLAY_TYPE S7S
+#define DISPLAY_TYPE OPENSEGMENT
 
 //Global variables for the analog pins
 unsigned int analogValue6 = 0;
@@ -118,8 +118,8 @@ void setup()
 // The display is constantly PWM'd in the loop()
 void loop()
 {
-  analogValue6 = analogRead(A6);
-  analogValue7 = analogRead(A7);
+  /*analogValue6 = analogRead(A6);
+  analogValue7 = analogRead(A7);*/
   
   //Serial.print("A6: ");
   //Serial.print(analogValue6);
@@ -127,7 +127,7 @@ void loop()
   //Serial.print(analogValue7);
 
   //Do calculation for 1st voltage meter
-  float fvoltage6 = ((analogValue6 * 50) / (float)1024);
+  /*float fvoltage6 = ((analogValue6 * 50) / (float)1024);
   int voltage6 = round(fvoltage6);
   display.digits[0] = voltage6 / 10;
   display.digits[1] = voltage6 % 10;
@@ -139,13 +139,12 @@ void loop()
   display.digits[3] = voltage7 % 10;
 
   display.decimals = ((1<<DECIMAL1) | (1<<DECIMAL3)); //Turn on the decimals next to digit1 and digit3
-
   myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
-  
+  */
   
   
 //  long myTimer = millis();    
-//  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
 //  Serial.print("Timer: ");
 //  Serial.println(millis() - myTimer);
 }
@@ -313,7 +312,11 @@ void setupDisplay()
   int displayType = COMMON_CATHODE; //SparkFun 1" displays are common cathode
 
   //Initialize the SevSeg library with all the pins needed for this type of display
-  myDisplay.Begin(displayType, numberOfDigits, digit1, digit2, digit3, digit4, segA, segB, segC, segD, segE, segF, segG, segDP);
+  myDisplay.Begin(displayType, numberOfDigits, 
+  digit1, digit2, digit3, digit4, 
+  segA, segB, segC, segD, segE, segF, segG, 
+  segDP);
+
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
