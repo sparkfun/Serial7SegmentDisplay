@@ -35,7 +35,7 @@ SevSeg myDisplay; //Create an instance of the object
 //OpenSegment uses PNP and NPN transistors to drive larger displays
 #define S7S            1
 #define OPENSEGMENT    2
-#define DISPLAY_TYPE S7S
+#define DISPLAY_TYPE OPENSEGMENT
 
 //Global variables
 unsigned int analogValue6 = 0; //These are used in analog meter mode
@@ -122,8 +122,8 @@ void displayCounter()
 {
   SPCR = 0; //Disable all SPI interrupts that may be turned on
 
-  int counterIncrement = SPI_MISO; //Labeled SDO
-  int counterDecrement = SPI_MOSI; //Labeled SDI
+  int counterIncrement = SPI_MOSI; //Labeled SDI
+  int counterDecrement = SPI_MISO; //Labeled SDO
 
   pinMode(counterIncrement, INPUT_PULLUP);
   pinMode(counterDecrement, INPUT_PULLUP);
