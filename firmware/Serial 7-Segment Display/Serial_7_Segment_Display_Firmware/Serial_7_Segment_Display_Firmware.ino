@@ -37,9 +37,10 @@ SevSeg myDisplay; //Create an instance of the object
 #define OPENSEGMENT    2
 #define DISPLAY_TYPE OPENSEGMENT
 
-//Global variables for the analog pins
-unsigned int analogValue6 = 0;
+//Global variables
+unsigned int analogValue6 = 0; //These are used in analog meter mode
 unsigned int analogValue7 = 0;
+char deviceMode; //This variable is useds to select which mode the device should be in
 
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
 struct dataBuffer
@@ -103,6 +104,7 @@ void setup()
   setupSPI();    // Initialize SPI stuff (enable, mode, interrupts)
   setupTWI();    // Initialize I2C stuff (address, interrupt, enable)
   setupAnalog(); // Initialize the analog inputs
+  setupMode();   // Determine which mode we should be in
 
   interrupts();  // Turn interrupts on, and les' go
 
@@ -111,17 +113,128 @@ void setup()
   display.digits[1] = 2;
   display.digits[2] = 3;
   display.digits[3] = 4;
-
+  
   myDisplay.SetBrightness(100); //Set the display to 100% bright
 }
 
 // The display is constantly PWM'd in the loop()
 void loop()
 {
-  myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+  if(deviceMode == MODE_DATA)
+  {
+    //Go into normal mode, monitoring UART/SPI/I2C
+    while(deviceMode == MODE_DATA)
+    {
+      //Just hang out and update the display as new data comes in
+      myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+
+      serialEvent(); //Check the serial buffer for new data
+    }
+  }
+  else if(deviceMode == MODE_COUNTER)
+  {
+    //Turn off the SPI and watch for increment pulses on the SDO pin, decrement on SDI
+    SPCR = 0; //Disable all SPI interrupts that may be turned on
+
+    int counterIncrement = SPI_MISO; //Labeled SDO
+    int counterDecrement = SPI_MOSI; //Labeled SDI
+
+    pinMode(counterIncrement, INPUT_PULLUP);
+    pinMode(counterDecrement, INPUT_PULLUP);
+
+    int counter = 0; //Watches the overall count
+    boolean incrementCounted = false; //Watches the toggle the counter pins
+    boolean decrementCounted = false;
+
+    while(deviceMode == MODE_COUNTER) //Loop until we receive a different mode command
+    {
+      //Check to see if there has been a low/high pulse on increment
+      if(digitalRead(counterIncrement == LOW))
+      {
+        if(incrementCounted == false) //Only increment counter if this is a new pulse
+        {
+          counter++;
+          incrementCounted = true; //We have now counted this pulse
+        }
+      }
+      else
+      {
+        //The increment pin is high, so sdo can be counted again
+        incrementCounted = false;
+      }
+
+      //Check to see if there has been a low/high pulse on increment
+      if(digitalRead(counterDecrement == LOW))
+      {
+        if(decrementCounted == false) //Only increment counter if this is a new pulse 
+        {
+          counter--;
+          decrementCounted = true; //We have now counted this pulse
+        }
+      }
+      else
+      {
+        //The increment pin is high, so sdo can be counted again
+        decrementCounted = false;
+      }
+
+      //Display this count
+      //char tempString[10]; //Used for sprintf
+      sprintf(display.digits, "%4d", counter); //Convert counter into a string that is right adjusted
+
+      
+      //int tempCounter = counter;
+      // for(int x = 0 ; x < 4 ; x++)
+      // {
+      // display.digits[3 - x] = (tempCounter % 10); //Pull off the right most digit and store in display array
+      // tempCounter /= 10; //Shave number down by one digit
+      // }
+
+      myDisplay.DisplayString(display.digits, 0); //(numberToDisplay, no decimals during counter mode)
+
+      serialEvent(); //Check the serial buffer for new data
+    }
+
+  }
+  else if(deviceMode == MODE_ANALOG)
+  {
+    //Do nothing but analog reads
+
+    while(deviceMode == MODE_ANALOG)
+    {
+      analogValue6 = analogRead(A6);
+      analogValue7 = analogRead(A7);
+
+      //Serial.print("A6: ");
+      //Serial.print(analogValue6);
+      //Serial.print(" A7: ");
+      //Serial.print(analogValue7);
+
+      //Do calculation for 1st voltage meter
+      float fvoltage6 = ((analogValue6 * 50) / (float)1024);
+      int voltage6 = round(fvoltage6);
+      display.digits[0] = voltage6 / 10;
+      display.digits[1] = voltage6 % 10;
+
+      //Do calculation for 2nd voltage meter
+      float fvoltage7 = ((analogValue7 * 50) / (float)1024);
+      int voltage7 = round(fvoltage7);
+      display.digits[2] = voltage7 / 10;
+      display.digits[3] = voltage7 % 10;
+
+      display.decimals = ((1<<DECIMAL1) | (1<<DECIMAL3)); //Turn on the decimals next to digit1 and digit3
+      myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+
+      serialEvent(); //Check the serial buffer for new data
+    }
+
+  }
+
+  //We will loop if we've received a new device mode command
 }
 
 // This is effectively the UART0 byte received interrupt routine
+// But not quite: serialEvent is only called after each loop() interation
 void serialEvent()
 {
   while (Serial.available()) 
@@ -192,7 +305,7 @@ void updateBufferData()
       break;
     case BAUD_CMD:  // Baud setting mode 
       EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
-      setupUART(); //Checks to see if this baud rate is valis and turns on UART at this speed
+      setupUART(); //Checks to see if this baud rate is valid and turns on UART at this speed
       break;
     case CURSOR_CMD:  // Set the cursor
       if (c <= 3)  // Limited error checking, if >3 cursor command will have no effect
@@ -200,7 +313,11 @@ void updateBufferData()
       break;
     case TWI_ADDRESS_CMD:  // Set the I2C Address
       EEPROM.write(TWI_ADDRESS_ADDRESS, c); // Update the EEPROM value
-      setupTWI(); //Checks to see if I2C address is valid an begins I2C
+      setupTWI(); //Checks to see if I2C address is valid and begins I2C
+      break;
+    case MODE_CMD:  // Set the device mode (example: data, analog, counter)
+      EEPROM.write(MODE_ADDRESS, c); // Update the EEPROM value
+      setupMode(); //Checks to see if this mode is valid and then enters new mode
       break;
     case FACTORY_RESET_CMD:  // Factory reset
       setDefaultSettings();  // Reset baud, brightness, and TWI address
@@ -321,11 +438,11 @@ void setupDisplay()
 
   //Initialize the SevSeg library with all the pins needed for this type of display
   myDisplay.Begin(displayType, numberOfDigits, 
-    digit1, digit2, digit3, digit4, 
-    digitColon, digitApostrophe, 
-    segA, segB, segC, segD, segE, segF, segG, 
-    segDP,
-    segmentColon, segmentApostrophe);
+  digit1, digit2, digit3, digit4, 
+  digitColon, digitApostrophe, 
+  segA, segB, segC, segD, segE, segF, segG, 
+  segDP,
+  segmentColon, segmentApostrophe);
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 }
@@ -387,6 +504,20 @@ void setupUART()
     break;
   }
 
+}
+
+//This function reads the MODE setting from EEPROM and checks to see if there are 
+//any hardware settings (closed jumpers for example) that puts the device into a 
+//certain mode. Available modes are regular, analog meter, and counter modes.
+void setupMode()
+{
+  deviceMode = EEPROM.read(MODE_ADDRESS);  // Read the mode the device should be in
+
+  if (deviceMode > MODE_COUNTER)  
+  { // If the mode is invalid, goto default mode
+    deviceMode = MODE_DEFAULT;
+    EEPROM.write(MODE_ADDRESS, MODE_DEFAULT);
+  }
 }
 
 //This sets up the two analog inputs
@@ -465,7 +596,7 @@ void checkEmergencyReset(void)
     constantDisplay("0-00", 500);
     constantDisplay("-000", 500);
   }
-  
+
   //Once we breakout of this loop (pin on RX is removed), system will init with new default settings
 }
 
@@ -478,7 +609,7 @@ void constantDisplay (char *theString, long amountOfTime)
 }
 
 // In case of emergency, resets all the system settings to safe values
-// This will reset baud, TWI address, and brightness to default values
+// This will reset baud, TWI address, brightness, and mode to default values
 void setDefaultSettings(void)
 {
   //Reset UART to 9600bps
@@ -490,5 +621,13 @@ void setDefaultSettings(void)
 
   //Reset the I2C address to the default 0x71
   EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
+
+  //Reset the mode to the default data interface
+  EEPROM.write(MODE_ADDRESS, MODE_DEFAULT);
+  deviceMode = MODE_DEFAULT; //Return device's mode to default
 }
+
+
+
+
 
