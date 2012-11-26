@@ -41,6 +41,7 @@ SevSeg myDisplay; //Create an instance of the object
 unsigned int analogValue6 = 0; //These are used in analog meter mode
 unsigned int analogValue7 = 0;
 char deviceMode; //This variable is useds to select which mode the device should be in
+unsigned char commandMode = 0;  // Used to indicate if a commandMode byte has been received
 
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
 struct dataBuffer
@@ -232,7 +233,6 @@ void displayAnalog()
 // will be executed from this function.
 void updateBufferData()
 {
-  unsigned char commandMode = 0;  // Used to indicate if a commandMode byte has been received
 
   // First we read from the oldest data in the buffer
   unsigned char c = buffer.data[buffer.tail];
