@@ -44,9 +44,9 @@ void setup() {
   
   delay(10);
   Serial7Segment.write(MODE_CMD); //Change the mode of the display
-  Serial7Segment.write(MODE_COUNTER); //Enter counter mode. Any pulse on SDI will go up. Any pulse on SDO will go down.
+//  Serial7Segment.write(MODE_COUNTER); //Enter counter mode. Any pulse on SDI will go up. Any pulse on SDO will go down.
 //  Serial7Segment.write(MODE_ANALOG); //Enter analog mode. Unit will display the analog voltages detected on A6/A7.
-//  Serial7Segment.write(MODE_DATA); //Return to normal mode. You can also do a hardware reset to return to normal data mode.
+  Serial7Segment.write((byte)MODE_DATA); //Return to normal mode. You can also do a hardware reset to return to normal data mode.
   
 }
 
