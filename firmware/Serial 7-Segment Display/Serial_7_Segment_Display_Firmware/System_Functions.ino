@@ -126,7 +126,11 @@ void setupDisplay()
 
   int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
 
-  int displayType = COMMON_CATHODE; //SparkFun 1" displays are common cathode
+  //The 1" SparkFun displays are common cathode but because of the PNP and NPN
+  //transistor configuration we are using, we need inverted signals:
+  //1 to turn a digit on, 0 to turn a segment on
+  //This is the same as a common anode setup.
+  int displayType = COMMON_ANODE; 
 
   //Initialize the SevSeg library with all the pins needed for this type of display
   myDisplay.Begin(displayType, numberOfDigits, 

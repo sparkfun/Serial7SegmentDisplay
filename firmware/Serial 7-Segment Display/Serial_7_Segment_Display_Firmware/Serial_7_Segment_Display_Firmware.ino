@@ -40,7 +40,7 @@ SevSeg myDisplay; //Create an instance of the object
 //Global variables
 unsigned int analogValue6 = 0; //These are used in analog meter mode
 unsigned int analogValue7 = 0;
-char deviceMode; //This variable is useds to select which mode the device should be in
+unsigned char deviceMode; // This variable is useds to select which mode the device should be in
 unsigned char commandMode = 0;  // Used to indicate if a commandMode byte has been received
 
 // Struct for circular data buffer data received over UART, SPI and I2C are all sent into a single buffer
@@ -78,13 +78,11 @@ void setup()
 
   interrupts();  // Turn interrupts on, and les' go
 
-  //Preload the display buffer, should only be used during code development
+  //Preload the display buffer with a default
   display.digits[0] = 1;
   display.digits[1] = 2;
   display.digits[2] = 3;
   display.digits[3] = 4;
-  
-  myDisplay.SetBrightness(100); //Set the display to 100% bright
 }
 
 // The display is constantly PWM'd in the loop()
