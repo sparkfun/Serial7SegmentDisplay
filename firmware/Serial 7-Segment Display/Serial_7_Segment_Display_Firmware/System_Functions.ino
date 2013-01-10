@@ -243,9 +243,9 @@ void setupUART()
 //certain mode. Available modes are regular, analog meter, and counter modes.
 void setupMode()
 {
-  deviceMode = EEPROM.read(MODE_ADDRESS);  // Read the mode the device should be in
-
-  if (deviceMode > MODE_COUNTER)  
+  deviceMode = EEPROM.read(MODE_ADDRESS); // Read the mode the device should be in
+  
+  if (deviceMode > MODE_COUNTER)
   { // If the mode is invalid, goto default mode
     deviceMode = MODE_DEFAULT;
     EEPROM.write(MODE_ADDRESS, MODE_DEFAULT);
@@ -356,5 +356,5 @@ void setDefaultSettings(void)
 
   //Reset the mode to the default data interface
   EEPROM.write(MODE_ADDRESS, MODE_DEFAULT);
-  deviceMode = MODE_DEFAULT; //Return device's mode to default
+  deviceMode = MODE_DEFAULT;
 }
