@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.1">
+<eagle version="6.4">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -8528,7 +8528,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="208.28" y="106.68" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="G/APOS" class="0">
+<net name="G" class="0">
 <segment>
 <pinref part="R9" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="78.74" x2="101.6" y2="78.74" width="0.1524" layer="91"/>
@@ -8540,7 +8540,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="208.28" y="76.2" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="F" class="0">
+<net name="F/APOS" class="0">
 <segment>
 <pinref part="R8" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="83.82" x2="101.6" y2="83.82" width="0.1524" layer="91"/>
@@ -8576,7 +8576,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="208.28" y="109.22" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="C" class="0">
+<net name="B" class="0">
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="99.06" x2="101.6" y2="99.06" width="0.1524" layer="91"/>
@@ -8588,7 +8588,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="208.28" y="111.76" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="B" class="0">
+<net name="A" class="0">
 <segment>
 <pinref part="R3" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="104.14" x2="101.6" y2="104.14" width="0.1524" layer="91"/>
@@ -8600,7 +8600,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="208.28" y="66.04" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="A/COL" class="0">
+<net name="C/COL" class="0">
 <segment>
 <pinref part="R2" gate="G$1" pin="2"/>
 <wire x1="99.06" y1="109.22" x2="101.6" y2="109.22" width="0.1524" layer="91"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.1">
+<eagle version="6.4">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -893,7 +893,7 @@ We've spent an enormous amount of time creating and checking these footprints an
 <class number="0" name="default" width="0" drill="0">
 </class>
 </classes>
-<designrules>
+<designrules name="default">
 <description language="en">&lt;b&gt;EAGLE Design Rules&lt;/b&gt;
 &lt;p&gt;
 The default Design Rules have been set to cover
@@ -1465,7 +1465,7 @@ design rules under a new name.</description>
 <wire x1="5.842" y1="4.826" x2="7.747" y2="4.826" width="0.254" layer="1"/>
 <wire x1="9.017" y1="3.556" x2="7.747" y2="4.826" width="0.254" layer="1"/>
 </signal>
-<signal name="G/APOS">
+<signal name="G">
 <contactref element="R9" pad="2"/>
 <contactref element="ATMEGA328P-AU" pad="9"/>
 <wire x1="24.75" y1="14.605" x2="24.75" y2="14.209" width="0.254" layer="1"/>
@@ -1473,7 +1473,7 @@ design rules under a new name.</description>
 <wire x1="23.495" y1="12.954" x2="13.1038" y2="12.954" width="0.254" layer="1"/>
 <wire x1="12.635225" y1="12.485425" x2="13.1038" y2="12.954" width="0.254" layer="1"/>
 </signal>
-<signal name="F">
+<signal name="F/APOS">
 <contactref element="R8" pad="2"/>
 <contactref element="ATMEGA328P-AU" pad="11"/>
 <wire x1="14.59" y1="14.605" x2="12.49205625" y2="14.605" width="0.254" layer="1"/>
@@ -1503,7 +1503,7 @@ design rules under a new name.</description>
 <wire x1="7.62" y1="5.08" x2="1.905" y2="10.795" width="0.254" layer="16"/>
 <wire x1="1.905" y1="11.176" x2="1.905" y2="10.795" width="0.254" layer="16"/>
 </signal>
-<signal name="C">
+<signal name="B">
 <contactref element="R4" pad="2"/>
 <contactref element="ATMEGA328P-AU" pad="23"/>
 <via x="4.156571875" y="11.303" extent="1-16" drill="0.508"/>
@@ -1519,7 +1519,7 @@ design rules under a new name.</description>
 <wire x1="28.067" y1="14.605" x2="27.3304" y2="13.8684" width="0.254" layer="1"/>
 <wire x1="4.156571875" y1="12.065" x2="4.156571875" y2="11.303" width="0.254" layer="1"/>
 </signal>
-<signal name="B">
+<signal name="A">
 <contactref element="R3" pad="2"/>
 <contactref element="ATMEGA328P-AU" pad="12"/>
 <via x="20.828" y="13.843" extent="1-16" drill="0.508"/>
@@ -1530,7 +1530,7 @@ design rules under a new name.</description>
 <wire x1="9.9314" y1="13.1757125" x2="10.5986875" y2="13.843" width="0.254" layer="16"/>
 <wire x1="10.5986875" y1="13.843" x2="20.828" y2="13.843" width="0.254" layer="16"/>
 </signal>
-<signal name="A/COL">
+<signal name="C/COL">
 <contactref element="R2" pad="2"/>
 <contactref element="ATMEGA328P-AU" pad="10"/>
 <wire x1="18.4" y1="14.605" x2="17.399" y2="14.605" width="0.254" layer="1"/>

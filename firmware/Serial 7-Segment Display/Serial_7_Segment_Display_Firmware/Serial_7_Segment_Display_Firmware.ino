@@ -35,7 +35,7 @@ SevSeg myDisplay; //Create an instance of the object
 //OpenSegment uses PNP and NPN transistors to drive larger displays
 #define S7S            1
 #define OPENSEGMENT    2
-#define DISPLAY_TYPE OPENSEGMENT
+#define DISPLAY_TYPE S7S
 
 //Global variables
 unsigned int analogValue6 = 0; //These are used in analog meter mode

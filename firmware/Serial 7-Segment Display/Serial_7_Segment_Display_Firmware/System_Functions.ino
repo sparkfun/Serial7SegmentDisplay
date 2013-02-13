@@ -144,25 +144,25 @@ void setupDisplay()
   //This pinout is for the original Serial7Segment layout
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 #if DISPLAY_TYPE == S7S
-  int digit1 = 16; //Analog 2 is 16
-  int digit2 = 17; //A3 is 17
-  int digit3 = 3;
-  int digit4 = 4;
+  int digit1 = 16; // DIG1 = A2/16 (PC2)
+  int digit2 = 17; // DIG2 = A3/17 (PC3)
+  int digit3 = 3;  // DIG3 = D3 (PD3)
+  int digit4 = 4;  // DIG4 = D4 (PD4)
 
   //Declare what pins are connected to the segments
-  int segA = 8; //Labeled B on schematic
-  int segB = 14; //Labeled C on schematic
-  int segC = 6; //Labeled A/COL on schematic
-  int segD = A1;
-  int segE = 23; //This is not a standard Arduino pin: Must add PB7 as digital pin 23 to pins_arduino.h
-  int segF = 7; 
-  int segG = 5; //Labeled G/APOS on schematic
-  int segDP= 22; //This is not a standard Arduino pin: Must add PB6 as digital pin 22 to pins_arduino.h
+  int segA = 8;  // A = D8 (PB0)
+  int segB = 14; // B = A0 (PC0)
+  int segC = 6;  // C = D6 (PD6), shares a pin with colon cathode
+  int segD = A1; // D = A1 (PC1)
+  int segE = 23; // E = PB7 (not a standard Arduino pin: Must add PB7 as digital pin 23 to pins_arduino.h)
+  int segF = 7;  // F = D7 (PD6), shares a pin with apostrophe cathode
+  int segG = 5;  // G = D5 (PD5)
+  int segDP= 22; //DP = PB6 (not a standard Arduino pin: Must add PB6 as digital pin 22 to pins_arduino.h)
 
-  int digitColon = 2; //The digit is the top side of this LED
-  int segmentColon = 6; //The segment is the bottom side of this LED
-  int digitApostrophe = 9;
-  int segmentApostrophe = 7; //Labeled F on schematic (there is an incorrect label G/APOS)
+  int digitColon = 2; // COL-A = D2 (PD2) (anode of colon)
+  int segmentColon = 6; // COL-C = D6 (PD6) (cathode of colon), shares a pin with C
+  int digitApostrophe = 9; // APOS-A = D9 (PB1) (anode of apostrophe)
+  int segmentApostrophe = 7; // APOS-C = D7 (PD7) (cathode of apostrophe), shares a pin with F
 
   int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
 
