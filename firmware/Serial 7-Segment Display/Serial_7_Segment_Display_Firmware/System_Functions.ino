@@ -250,6 +250,31 @@ void setupMode()
     deviceMode = MODE_DEFAULT;
     EEPROM.write(MODE_ADDRESS, MODE_DEFAULT);
   }
+  
+#if DISPLAY_TYPE == OPENSEGMENT
+  //See if any solder jumpers have been closed
+
+  //Arduino doesn't really support PB6 and PB7 and GPIOs (normally the 16MHz
+  //crystal is there) so let's do it the old school way
+  //digitalWrite(JUMPER_COUNTER, HIGH); //Enable internal pullup
+  //pinMode(JUMPER_METER, INPUT_PULLUP);
+  
+  DDRB &= 0b00111111; //Set PB7 and PB6 to inputs
+  PORTB |= 0b11000000; //Enable external pull ups
+  
+  Serial.println("Jumper check:");
+  if( (PINB & 1<<6) == 0) //If counter pin is low
+  {
+    deviceMode = MODE_COUNTER;
+    Serial.println("PB6 jumper closed");
+  }
+  else if( (PINB & 1<<7) == 0) //digitalRead(JUMPER_METER) == LOW)
+  {
+    deviceMode = MODE_ANALOG;
+    Serial.println("PB7 jumper closed");
+  }
+#endif
+
 }
 
 //This sets up the two analog inputs

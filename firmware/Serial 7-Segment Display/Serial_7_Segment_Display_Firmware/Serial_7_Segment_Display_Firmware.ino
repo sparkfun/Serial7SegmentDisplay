@@ -15,7 +15,7 @@
  brightness, UART baud rate, i2c address or factory reset.
  
  Note: To use the additional pins, PB6 and PB7, on the ATmega328 we have to add 
- some maps to the pins_arduino.h file. This allows Arduino to identify PB6 and 
+ some maps to the pins_arduino.h file. This allows Arduino to identify PB6 as 
  digital pin 22, and PB7 as digital pin 23. Because the Serial 7-Segment runs on 
  the ATmega328's internal oscillator, these two pins open up for our use.
  
@@ -35,7 +35,7 @@ SevSeg myDisplay; //Create an instance of the object
 //OpenSegment uses PNP and NPN transistors to drive larger displays
 #define S7S            1
 #define OPENSEGMENT    2
-#define DISPLAY_TYPE S7S
+#define DISPLAY_TYPE OPENSEGMENT
 
 //Global variables
 unsigned int analogValue6 = 0; //These are used in analog meter mode
