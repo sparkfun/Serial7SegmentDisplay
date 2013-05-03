@@ -177,6 +177,36 @@ void setupDisplay()
   segmentColon, segmentApostrophe);
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  
+  //This pinout is for the original Serial 7 Segment Shield
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+#if DISPLAY_TYPE == S7SHIELD
+  int digit1 = 16; // DIG1 = A2/16 (PC2)
+  int digit2 = 17; // DIG2 = A3/17 (PC3)
+  int digit3 = 3;  // DIG3 = D3 (PD3)
+  int digit4 = 4;  // DIG4 = D4 (PD4)
+
+  //Declare what pins are connected to the segments
+  int segA = 8;  // A = D8 (PB0)
+  int segB = 14; // B = A0 (PC0)
+  int segC = 6;  // C = D6 (PD6), shares a pin with colon cathode
+  int segD = A1; // D = A1 (PC1)
+  int segE = 23; // E = PB7 (not a standard Arduino pin: Must add PB7 as digital pin 23 to pins_arduino.h)
+  int segF = 7;  // F = D7 (PD6), shares a pin with apostrophe cathode
+  int segG = 5;  // G = D5 (PD5)
+  int segDP= 22; //DP = PB6 (not a standard Arduino pin: Must add PB6 as digital pin 22 to pins_arduino.h)
+
+  int numberOfDigits = 4; //Do you have a 2 or 4 digit display?
+
+  int displayType = COMMON_CATHODE; 
+
+  //Initialize the SevSeg library with all the pins needed for this type of display
+  myDisplay.Begin(displayType, numberOfDigits, 
+  digit1, digit2, digit3, digit4, 
+  segA, segB, segC, segD, segE, segF, segG, 
+  segDP);
+#endif
+  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 }
 
 //This sets up the UART with the stored baud rate in EEPROM
