@@ -19,13 +19,12 @@
  digital pin 22, and PB7 as digital pin 23. Because the Serial 7-Segment runs on 
  the ATmega328's internal oscillator, these two pins open up for our use.
  
- Hardware: You can find the Serial 7-Segment Display Schematic here:
- !!! Add schematic link
- 
  */
 #include <Wire.h>  // Handles I2C
 #include <EEPROM.h>  // Brightness, Baud rate, and I2C address are stored in EEPROM
 #include "settings.h"  // Defines command bytes, EEPROM addresses, display data
+// This code uses the SevSeg library, which can be donwnloaded from:
+// https://github.com/sparkfun/SevSeg
 #include "SevSeg.h" //Library to control generic seven segment displays
 
 SevSeg myDisplay; //Create an instance of the object
