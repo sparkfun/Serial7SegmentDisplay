@@ -8,6 +8,11 @@
  Serial7Segment is an open source seven segment display. 
 
  This is example code that shows how to control the brightness level of the display over I2C.
+
+ Please Note: 0x71 is the 7-bit I2C address. If you are using a different language than Arduino you will probably
+ need to add the Read/Write bit to the end of the address. This means the default read address for the OpenSegment
+ is 0b.1110.0011 or 0xE3 and the write address is 0b.1110.0010 or 0xE2.
+ For more information see https://learn.sparkfun.com/tutorials/i2c
  
  Note: This code expects the display to be listening at the default I2C address. If your display is not at 0x71, you can
  do a software or hardware reset. See the Wiki for more info: 
@@ -19,6 +24,12 @@
  VIN to PWR
  GND to GND
 
+ For this example pull up resistors are not needed on SDA and SCL. If you have other devices on the
+ I2C bus then 4.7k pull up resistors are recommended.
+
+ OpenSegment will work at 400kHz Fast I2C. Use the .setClock() call shown below to set the data rate 
+ faster if needed.
+
 */
 
 #include <Wire.h>
@@ -28,6 +39,9 @@
 void setup() 
 {
   Wire.begin(); //Join the bus as master
+
+  //By default .begin() will set I2C SCL to Standard Speed mode of 100kHz
+  //Wire.setClock(400000); //Optional - set I2C SCL to High Speed Mode of 400kHz
 
   Serial.begin(9600); //Start serial communication at 9600 for debug statements
   Serial.println("OpenSegment Example Code");
