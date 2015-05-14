@@ -14,6 +14,6 @@ Serial7Seg.bootloader.lock_bits=0x0F
 Serial7Seg.build.mcu=atmega328p
 Serial7Seg.build.f_cpu=8000000L
 Serial7Seg.build.core=arduino
-Serial7Seg.build.variant=standard
+Serial7Seg.build.variant=ser7seg
 
 ##############################################################
