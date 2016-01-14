@@ -31,6 +31,8 @@
 #define MODE_ANALOG  1
 #define MODE_COUNTER 2
 
+#define CMD_TIMEOUT   50 // !!!NEW
+
 const int TWI_ADDRESS_DEFAULT = 0x71;
 const int BAUD_DEFAULT  = BAUD_9600;  // 9600 for 8MHz, 2x speed
 const int BRIGHTNESS_DEFAULT = 100;  // 100%, full brightness

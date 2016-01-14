@@ -38,6 +38,7 @@ SevSeg myDisplay; //Create an instance of the object
 #define S7SHIELD       3
 #define DISPLAY_TYPE OPENSEGMENT
 
+
 //Global variables
 unsigned int analogValue6 = 0; //These are used in analog meter mode
 unsigned int analogValue7 = 0;
@@ -232,7 +233,8 @@ void displayAnalog()
 // will be executed from this function.
 void updateBufferData()
 {
-
+	//static time variable - prevent reset display while sending a command value
+	static unsigned long cmdTime = 0;
   // First we read from the oldest data in the buffer
   unsigned char c = buffer.data[buffer.tail];
   buffer.tail = (buffer.tail + 1) % BUFFER_SIZE;  // and update the tail to the next oldest
@@ -244,7 +246,7 @@ void updateBufferData()
     display.digits[display.cursor] = c;  // just store the read data into the cursor-active digit
     display.cursor = ((display.cursor + 1) % 4);  // Increment cursor, set back to 0 if necessary
   }
-  else if (c == RESET_CMD)  // If the received char is the reset command
+  else if (c == RESET_CMD && (millis() - cmdTime) > CMD_TIMEOUT)  // If the received char is the reset command and it's not just after command order
   {
     for(int i = 0 ; i < 4 ; i++)
       display.digits[i] = 'x';  // clear all digits
@@ -301,6 +303,7 @@ void updateBufferData()
   else  // Finally, if we weren't in command mode, if the byte isn't displayable, we'll enter command mode
   {
     commandMode = c;  // which command mode is reflected by value of commandMode
+	cmdTime = millis();
   }
 }
 
