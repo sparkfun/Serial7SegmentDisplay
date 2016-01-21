@@ -244,7 +244,7 @@ void updateBufferData()
     display.digits[display.cursor] = c;  // just store the read data into the cursor-active digit
     display.cursor = ((display.cursor + 1) % 4);  // Increment cursor, set back to 0 if necessary
   }
-  else if (c == RESET_CMD)  // If the received char is the reset command
+  else if ((c == RESET_CMD) && (!commandMode))  // If the received char is the reset command
   {
     for(int i = 0 ; i < 4 ; i++)
       display.digits[i] = 'x';  // clear all digits
