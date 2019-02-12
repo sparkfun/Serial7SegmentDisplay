@@ -12,6 +12,11 @@ Repository Contents
 * **/firmware** - Arduino firmware and test code
 * **/hardware** - PCB design files (created with Eagle 6.1.0)
 
+Documentation
+--------------
+* **[Hookup Guide](https://learn.sparkfun.com/tutorials/using-the-serial-7-segment-display)** - Basic hookup guide for the Serial Enabled 7-Segment Displays.
+* **[Datasheet](https://github.com/sparkfun/Serial7SegmentDisplay/wiki/Serial-7-Segment-Display-Datasheet)** - Specifications
+
 Product Versions
 ----------------
 
