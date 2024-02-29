@@ -91,7 +91,7 @@ void setupDisplay()
     settingBrightness = BRIGHTNESS_DEFAULT; //By default, unit will be brightest
     EEPROM.write(BRIGHTNESS_ADDRESS, settingBrightness);
   }
-  myDisplay.SetBrightness(settingBrightness); //Set the display to 100% bright
+  myDisplay.setBrightness(settingBrightness); //Set the display to 100% bright
 
   // Set the initial state of displays and decimals 'x' =  off
   display.digits[0] = 'x';
@@ -132,11 +132,31 @@ void setupDisplay()
   //This is the same as a common anode setup.
   int displayType = COMMON_ANODE; 
 
+  // Configure SegSev parameters for this layout
+  uint8_t digitPins[] = {
+    digit1,
+    digit2,
+    digit3,
+    digit4
+  };
+  uint8_t segmentPins[] = {
+    segA,
+    segB,
+    segC,
+    segD,
+    segE,
+    segF,
+    segG,
+    segDP
+  };
+  bool resistorsOnSegments = false;   // 'false' means resistors are on digit pins
+  bool updateWithDelays = false;      // Default 'false' is Recommended
+  bool leadingZeros = false;          // Use 'true' if you'd like to keep the leading zeros
+  bool disableDecPoint = false;       // Use 'true' if your decimal point doesn't exist or isn't connected
+
   //Initialize the SevSeg library with all the pins needed for this type of display
-  myDisplay.Begin(displayType, numberOfDigits, 
-  digit1, digit2, digit3, digit4, 
-  segA, segB, segC, segD, segE, segF, segG, 
-  segDP);
+  myDisplay.begin(displayType, numberOfDigits, digitPins, segmentPins, resistorsOnSegments,
+  updateWithDelays, leadingZeros, disableDecPoint);
 
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -168,13 +188,35 @@ void setupDisplay()
 
   int displayType = COMMON_ANODE; //SparkFun 10mm height displays are common anode
 
+  // Configure SegSev parameters for this layout
+  uint8_t digitPins[] = {
+    digit1,
+    digit2,
+    digit3,
+    digit4,
+    digitColon,
+    digitApostrophe
+  };
+  uint8_t segmentPins[] = {
+    segA,
+    segB,
+    segC,
+    segD,
+    segE,
+    segF,
+    segG,
+    segDP,
+    segmentColon,
+    segmentApostrophe
+  };
+  bool resistorsOnSegments = false;   // 'false' means resistors are on digit pins
+  bool updateWithDelays = false;      // Default 'false' is Recommended
+  bool leadingZeros = false;          // Use 'true' if you'd like to keep the leading zeros
+  bool disableDecPoint = false;       // Use 'true' if your decimal point doesn't exist or isn't connected
+
   //Initialize the SevSeg library with all the pins needed for this type of display
-  myDisplay.Begin(displayType, numberOfDigits, 
-  digit1, digit2, digit3, digit4, 
-  digitColon, digitApostrophe, 
-  segA, segB, segC, segD, segE, segF, segG, 
-  segDP,
-  segmentColon, segmentApostrophe);
+  myDisplay.begin(displayType, numberOfDigits, digitPins, segmentPins, resistorsOnSegments,
+  updateWithDelays, leadingZeros, disableDecPoint);
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   
@@ -200,11 +242,31 @@ void setupDisplay()
 
   int displayType = COMMON_CATHODE; 
 
+  // Configure SegSev parameters for this layout
+  uint8_t digitPins[] = {
+    digit1,
+    digit2,
+    digit3,
+    digit4
+  };
+  uint8_t segmentPins[] = {
+    segA,
+    segB,
+    segC,
+    segD,
+    segE,
+    segF,
+    segG,
+    segDP
+  };
+  bool resistorsOnSegments = false;   // 'false' means resistors are on digit pins
+  bool updateWithDelays = false;      // Default 'false' is Recommended
+  bool leadingZeros = false;          // Use 'true' if you'd like to keep the leading zeros
+  bool disableDecPoint = false;       // Use 'true' if your decimal point doesn't exist or isn't connected
+
   //Initialize the SevSeg library with all the pins needed for this type of display
-  myDisplay.Begin(displayType, numberOfDigits, 
-  digit1, digit2, digit3, digit4, 
-  segA, segB, segC, segD, segE, segF, segG, 
-  segDP);
+  myDisplay.begin(displayType, numberOfDigits, digitPins, segmentPins, resistorsOnSegments,
+  updateWithDelays, leadingZeros, disableDecPoint);
 #endif
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 }
@@ -360,7 +422,7 @@ void checkEmergencyReset(void)
   //Quick pin check
   if(digitalRead(0) == HIGH) return;
 
-  myDisplay.SetBrightness(100); //Set display to 100% brightness during emergency reset so we can see it
+  myDisplay.setBrightness(100); //Set display to 100% brightness during emergency reset so we can see it
 
   //Wait 2 seconds, displaying reset-ish things while we wait
   for(uint8_t i = 0 ; i < 10 ; i++)
@@ -392,7 +454,7 @@ void constantDisplay (char *theString, long amountOfTime)
 {
   long startTime = millis();
   while( (millis() - startTime) < amountOfTime)
-    myDisplay.DisplayString(theString, 0); //(numberToDisplay, decimal point location)
+    myDisplay.setNumber(theString, 0); //(numberToDisplay, decimal point location)
 }
 
 // In case of emergency, resets all the system settings to safe values
@@ -404,7 +466,7 @@ void setDefaultSettings(void)
 
   //Reset system brightness to the brightest level
   EEPROM.write(BRIGHTNESS_ADDRESS, BRIGHTNESS_DEFAULT);
-  myDisplay.SetBrightness(BRIGHTNESS_DEFAULT);
+  myDisplay.setBrightness(BRIGHTNESS_DEFAULT);
 
   //Reset the I2C address to the default 0x71
   EEPROM.write(TWI_ADDRESS_ADDRESS, TWI_ADDRESS_DEFAULT);
