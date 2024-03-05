@@ -111,7 +111,8 @@ void displayData()
   while(deviceMode == MODE_DATA)
   {
     //Just hang out and update the display as new data comes in
-    myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+    myDisplay.setNumber(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+    myDisplay.refreshDisplay();
 
     serialEvent(); //Check the serial buffer for new data
   }
@@ -138,7 +139,8 @@ void displayCounter()
     if(digitalRead(counterIncrement) == LOW)
     {
       delay(1); //Check the pin 1 ms later - this is for debounce
-      myDisplay.DisplayString(display.digits, 0); //Update display so that it doesn't blink
+      myDisplay.setNumber(display.digits, 0); //Update display so that it doesn't blink
+      myDisplay.refreshDisplay();
 
       if(digitalRead(counterIncrement) == LOW)
       {
@@ -159,8 +161,9 @@ void displayCounter()
     if(digitalRead(counterDecrement) == LOW)
     {
       delay(1); //Check the pin 1 ms later - this is for debounce
-      myDisplay.DisplayString(display.digits, 0); //Update display so that it doesn't blink
-      
+      myDisplay.setNumber(display.digits, 0); //Update display so that it doesn't blink
+      myDisplay.refreshDisplay();
+
       if(digitalRead(counterDecrement) == LOW)
       {
         if(decrementCounted == false) //Only increment counter if this is a new pulse 
@@ -188,7 +191,8 @@ void displayCounter()
     // tempCounter /= 10; //Shave number down by one digit
     // }
 
-    myDisplay.DisplayString(display.digits, 0); //(numberToDisplay, no decimals during counter mode)
+    myDisplay.setNumber(display.digits, 0); //(numberToDisplay, no decimals during counter mode)
+    myDisplay.refreshDisplay();
 
     serialEvent(); //Check the serial buffer for new data
   }  
@@ -220,7 +224,8 @@ void displayAnalog()
     display.digits[3] = voltage7 % 10;
 
     display.decimals = ((1<<DECIMAL1) | (1<<DECIMAL3)); //Turn on the decimals next to digit1 and digit3
-    myDisplay.DisplayString(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+    myDisplay.setNumber(display.digits, display.decimals); //(numberToDisplay, decimal point location)
+    myDisplay.refreshDisplay();
 
     serialEvent(); //Check the serial buffer for new data
   }  
@@ -260,7 +265,7 @@ void updateBufferData()
       break;
     case BRIGHTNESS_CMD:  // Brightness setting mode
       EEPROM.write(BRIGHTNESS_ADDRESS, c);    // write the new value to EEPROM
-      myDisplay.SetBrightness(c); //Set the display to this brightness level
+      myDisplay.setBrightness(c); //Set the display to this brightness level
       break;
     case BAUD_CMD:  // Baud setting mode 
       EEPROM.write(BAUD_ADDRESS, c);  // Update EEPROM with new baud setting
