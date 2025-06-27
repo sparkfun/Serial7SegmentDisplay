@@ -1,7 +1,7 @@
 7-Segment Serial Display
 ========================
 
-[![7-Segment Serial Display](https://dlnmh9ip6v2uc.cloudfront.net/images/products/1/1/6/2/9/11629-02_medium.jpg)  
+[![7-Segment Serial Display](https://cdn.sparkfun.com/assets/parts/7/6/7/8/11440-01.jpeg)  
 *7-Segment Serial Display (COM-11629)*](https://www.sparkfun.com/products/11629)
 
 The 7-Segment Serial Display combines a classic 4-digit 7-segment display and an ATMega328 microcontroller allowing you to control every segment individually using only a few serial lines.
